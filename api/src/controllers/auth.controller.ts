@@ -1,12 +1,12 @@
 import { Request, Response } from "express"
 import { apiStore } from "../db"
-import { auth } from "../middlewares/auth.middleware"
+import { auth, verifyAuth } from "../middlewares/auth.middleware"
 import { bcrypt, generateUUID } from "../utils/tools"
 import { authValidator } from "../validators/authValidator"
 import { matchedData, validationResult } from "express-validator"
 
 export default {
-  GET: {},
+  GET: { "/me": [verifyAuth] },
 
   POST: {
     "/sign-up": [
