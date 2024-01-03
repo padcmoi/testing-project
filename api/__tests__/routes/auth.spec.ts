@@ -50,3 +50,8 @@ describe("/api/auth/sign-up ", () => {
     apiStore.prepare("DELETE FROM Users WHERE email = ?").run(credentials.email)
   })
 })
+
+describe("/api/auth/sign-in ", () => {
+  beforeAll(() => {})
+  afterAll(() => {})
+})
