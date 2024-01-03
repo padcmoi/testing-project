@@ -2,6 +2,7 @@ import request from "supertest"
 
 import app from "../../src/app"
 import { apiStore } from "../../src/db"
+import { bcrypt, generateUUID } from "../../src/utils/tools"
 
 const credentials = { email: "abc-test@localhost.com", password: "n9wb@DTJ.MLZ3" }
 
@@ -52,6 +53,35 @@ describe("/api/auth/sign-up ", () => {
 })
 
 describe("/api/auth/sign-in ", () => {
-  beforeAll(() => {})
-  afterAll(() => {})
+  beforeAll(async () => {
+    const hash = await bcrypt.hash(credentials.password)
+    await apiStore.prepare("INSERT INTO Users (userId, email, password) VALUES (?,?,?)").run(generateUUID(credentials.email), credentials.email, hash)
+  })
+
+  test("loggedIn successfull", async () => {
+    const res = await request(app).post("/api/auth/sign-in").send(credentials).set("Accept", "application/json").expect("Content-Type", /json/).expect(201)
+
+    const authorization = res.header.authorization
+
+    expect(authorization.split(" ")[0]).toEqual("Bearer")
+    expect(authorization.slice(7, authorization.length).split(".").length).toEqual(3)
+
+    expect(res.body).toEqual({ success: true })
+  })
+  test("wrong email only or inexists", async () => {
+    const res = await request(app).post("/api/auth/sign-in").send(credentials).set("Accept", "application/json").expect("Content-Type", /json/).expect(401)
+
+    expect(res.header.authorization).toEqual("")
+
+    expect(res.body).toEqual({ success: false, errors: ["Identifiants erronés"] })
+  })
+  test("wrong password only", async () => {
+    const res = await request(app).post("/api/auth/sign-in").send(credentials).set("Accept", "application/json").expect("Content-Type", /json/).expect(401)
+
+    expect(res.header.authorization).toEqual("")
+
+    expect(res.body).toEqual({ success: false, errors: ["Identifiants erronés"] })
+  })
+
+  afterAll(() => apiStore.prepare("DELETE FROM Users WHERE email = ?").run(credentials.email))
 })
