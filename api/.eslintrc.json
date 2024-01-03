@@ -1,0 +1,55 @@
+{
+  "root": true,
+  "ignorePatterns": ["**/*.js"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "sourceType": "module"
+  },
+  "env": {
+    "node": true,
+    "jest": true
+  },
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
+  "plugins": ["@typescript-eslint"],
+
+  "rules": {
+    "indent": ["off", 2],
+    "prefer-template": "error",
+    "curly": ["off", "multi-or-nest"],
+    "quotes": [
+      "error",
+      "double",
+      {
+        "avoidEscape": false,
+        "allowTemplateLiterals": false
+      }
+    ],
+    "quote-props": ["error", "as-needed"],
+    "no-trailing-spaces": "off",
+    "semi": ["off", "always"],
+    "object-shorthand": "warn",
+    "prefer-const": [
+      "off",
+      {
+        "destructuring": "all",
+        "ignoreReadBeforeAssign": false
+      }
+    ],
+    "space-before-function-paren": [
+      "error",
+      {
+        "anonymous": "always",
+        "named": "never",
+        "asyncArrow": "always"
+      }
+    ],
+    "linebreak-style": 0,
+    "@typescript-eslint/interface-name-prefix": "off",
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/no-var": "off",
+    "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/no-var-requires": "off"
+  }
+}
