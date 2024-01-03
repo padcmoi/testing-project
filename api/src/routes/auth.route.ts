@@ -4,7 +4,7 @@ const router = Router()
 
 import authController from "../controllers/auth.controller"
 
-router.get("/me", [])
+router.get("/me", authController.GET["/me"])
 
 router.post("/sign-up", authController.POST["/sign-up"])
 router.post("/sign-in", authController.POST["/sign-in"])

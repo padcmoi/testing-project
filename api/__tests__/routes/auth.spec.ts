@@ -4,6 +4,7 @@ import app from "../../src/app"
 import { apiStore } from "../../src/db"
 import { bcrypt, generateUUID } from "../../src/utils/tools"
 import { auth } from "../../src/middlewares/auth.middleware"
+import { sign } from "jsonwebtoken"
 
 const credentials = { email: "abc-test@localhost.com", password: "n9wb@DTJ.MLZ3" }
 
@@ -112,6 +113,60 @@ describe("/api/auth/sign-in ", () => {
     expect(res.header.authorization).toEqual("")
 
     expect(res.body).toEqual({ success: false, errors: ["Identifiants erronés"] })
+  })
+
+  afterAll(() => apiStore.prepare("DELETE FROM Users WHERE email = ?").run(credentials.email))
+})
+
+describe("[GET] /api/auth/me", () => {
+  beforeAll(async () => {
+    const hash = await bcrypt.hash(credentials.password)
+    await apiStore.prepare("INSERT INTO Users (userId, email, password) VALUES (?,?,?)").run(generateUUID(credentials.email), credentials.email, hash)
+  })
+
+  test("check with no token provide", async () => {
+    const res = await request(app).get("/api/auth/me").set("Authorization", "").set("Accept", "application/json").expect("Content-Type", /json/).expect(403)
+
+    expect(res.header.authorization).toEqual("")
+    expect(res.body).toEqual({ msg: "No token provided" })
+  })
+  test("check with token expired", async () => {
+    const user = apiStore.prepare("SELECT userId FROM Users WHERE email = ?").get(credentials.email) as { userId: string } | undefined
+    const authorization = sign({ userId: user?.userId, renew: 0 }, "gY4J3gaauRU9nE3CUpn6LetE0", { expiresIn: 0 })
+
+    const res = await request(app)
+      .get("/api/auth/me")
+      .set("Authorization", authorization)
+      .set("Accept", "application/json")
+      .expect("Content-Type", /json/)
+      .expect(401)
+
+    expect(res.header.authorization).toEqual("")
+    expect(res.body).toEqual({ success: false })
+  })
+  test("check with invalid token", async () => {
+    const authorization = "aaa.bbb.ccc"
+
+    const res = await request(app)
+      .get("/api/auth/me")
+      .set("Authorization", authorization)
+      .set("Accept", "application/json")
+      .expect("Content-Type", /json/)
+      .expect(403)
+
+    expect(res.header.authorization).toEqual("")
+    expect(res.body).toEqual({ msg: "Token invalid" })
+  })
+
+  test("valid token, not expired and renewable", async () => {
+    const user = apiStore.prepare("SELECT userId FROM Users WHERE email = ?").get(credentials.email) as { userId: string } | undefined
+    const authorization = sign({ userId: user?.userId, renew: 0 }, "gY4J3gaauRU9nE3CUpn6LetE0", { expiresIn: 30 })
+
+    const res = await request(app).get("/api/auth/me").set("Authorization", authorization).set("Accept", "application/json").expect("Content-Type", /json/)
+
+    const _authorization = res.header.authorization
+    expect(_authorization.split(" ")[0]).toEqual("Bearer")
+    expect(_authorization.slice(7, _authorization.length).split(".").length).toEqual(3)
   })
 
   afterAll(() => apiStore.prepare("DELETE FROM Users WHERE email = ?").run(credentials.email))

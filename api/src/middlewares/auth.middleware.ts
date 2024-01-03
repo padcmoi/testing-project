@@ -18,6 +18,14 @@ export const auth = {
 
     res.header("authorization", `Bearer ${token}`)
   },
+  isInvalidToken(token: string) {
+    try {
+      verify(token, "gY4J3gaauRU9nE3CUpn6LetE0", { ignoreExpiration: true })
+      return false
+    } catch (error) {
+      return true
+    }
+  },
   verify(token: string) {
     this.payload = verify(token, "gY4J3gaauRU9nE3CUpn6LetE0", { ignoreExpiration: true }) as JwtAuthDecoded
   },
@@ -38,6 +46,11 @@ export const verifyAuth = async (req: Request, res: Response, next: NextFunction
   if (authorization.startsWith("Bearer ")) {
     authorization = authorization.slice(7, authorization.length)
     if (!authorization || authorization === "") return res.status(403).json({ msg: "No bearer token provided" })
+  }
+
+  // IMPORTANT check token format to avoid jwt crash
+  if (auth.isInvalidToken(authorization)) {
+    return res.status(403).json({ msg: "Token invalid" })
   }
 
   auth.verify(authorization)
