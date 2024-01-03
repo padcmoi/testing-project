@@ -6,9 +6,11 @@ import { apiStore } from "../../src/db"
 const credentials = { email: "abc-test@localhost.com", password: "n9wb@DTJ.MLZ3" }
 
 describe("/api/auth/sign-up ", () => {
-  test("failed low password", async () => {
+  beforeAll(() => {
     apiStore.prepare("DELETE FROM Users WHERE email = ?").run(credentials.email)
+  })
 
+  test("failed low password", async () => {
     const res = await request(app)
       .post("/api/auth/sign-up")
       .send({ email: credentials.email, password: "low" })
@@ -42,7 +44,9 @@ describe("/api/auth/sign-up ", () => {
     expect(authorization.slice(7, authorization.length).split(".").length).toEqual(1)
 
     expect(res.body).toEqual({ success: false, errors: ["Cet email est utilisé"] })
+  })
 
+  afterAll(() => {
     apiStore.prepare("DELETE FROM Users WHERE email = ?").run(credentials.email)
   })
 })
