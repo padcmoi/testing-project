@@ -124,6 +124,12 @@ describe("[GET] /api/auth/me", () => {
     await apiStore.prepare("INSERT INTO Users (userId, email, password) VALUES (?,?,?)").run(generateUUID(credentials.email), credentials.email, hash)
   })
 
+  test("check with no token provide", async () => {
+    const res = await request(app).get("/api/auth/me").set("Authorization", "").set("Accept", "application/json").expect("Content-Type", /json/).expect(403)
+
+    expect(res.header.authorization).toEqual("")
+    expect(res.body).toEqual({ msg: "No token provided" })
+  })
   test("check with token expired", async () => {
     const user = apiStore.prepare("SELECT userId FROM Users WHERE email = ?").get(credentials.email) as { userId: string } | undefined
     const authorization = sign({ userId: user?.userId, renew: 0 }, "gY4J3gaauRU9nE3CUpn6LetE0", { expiresIn: 0 })
