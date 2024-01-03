@@ -9,7 +9,7 @@ export const authValidator = {
       .isEmail()
       .withMessage((_, meta) => "email invalide")
       .custom(async (email: string | undefined, meta) => {
-        const user = (await apiStore.prepare("SELECT userId FROM Users WHERE email = ?").get(email ?? "")) as { userId: string }[] | null
+        const user = (await apiStore.prepare("SELECT userId FROM Users WHERE email = ?").get(email ?? "")) as { userId: string } | undefined
         if (user) throw new Error("Cet email est utilisé")
       }),
     password: body("password")

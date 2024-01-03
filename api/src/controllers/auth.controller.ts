@@ -36,6 +36,22 @@ export default {
         res.status(200).json({ success: true })
       },
     ],
+
+    "/sign-in": [
+      authValidator.validators.email,
+      async (req: Request, res: Response) => {
+        const user = (await apiStore.prepare("SELECT userId, password FROM Users WHERE email = ?").get(req.body.email ?? "")) as
+          | { userId: string; password: string }
+          | undefined
+        if (!user || !bcrypt.matchSync(req.body.password ?? "", user.password)) {
+          res.status(401).json({ success: false, errors: ["Identifiants erronés"] })
+        } else {
+          auth.sign(res, user.userId)
+
+          res.status(201).json({ success: true })
+        }
+      },
+    ],
   },
 
   PUT: {},
