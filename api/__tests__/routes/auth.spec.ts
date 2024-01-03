@@ -158,5 +158,16 @@ describe("[GET] /api/auth/me", () => {
     expect(res.body).toEqual({ msg: "Token invalid" })
   })
 
+  test("valid token, not expired and renewable", async () => {
+    const user = apiStore.prepare("SELECT userId FROM Users WHERE email = ?").get(credentials.email) as { userId: string } | undefined
+    const authorization = sign({ userId: user?.userId, renew: 0 }, "gY4J3gaauRU9nE3CUpn6LetE0", { expiresIn: 30 })
+
+    const res = await request(app).get("/api/auth/me").set("Authorization", authorization).set("Accept", "application/json").expect("Content-Type", /json/)
+
+    const _authorization = res.header.authorization
+    expect(_authorization.split(" ")[0]).toEqual("Bearer")
+    expect(_authorization.slice(7, _authorization.length).split(".").length).toEqual(3)
+  })
+
   afterAll(() => apiStore.prepare("DELETE FROM Users WHERE email = ?").run(credentials.email))
 })

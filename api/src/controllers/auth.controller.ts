@@ -6,7 +6,14 @@ import { authValidator } from "../validators/authValidator"
 import { matchedData, validationResult } from "express-validator"
 
 export default {
-  GET: { "/me": [verifyAuth] },
+  GET: {
+    "/me": [
+      verifyAuth,
+      async (req: Request, res: Response) => {
+        res.status(200).json({ success: true })
+      },
+    ],
+  },
 
   POST: {
     "/sign-up": [
