@@ -114,5 +114,5 @@ describe("/api/auth/sign-in ", () => {
     expect(res.body).toEqual({ success: false, errors: ["Identifiants erronés"] })
   })
 
-  //   afterAll(() => apiStore.prepare("DELETE FROM Users WHERE email = ?").run(credentials.email))
+  afterAll(() => apiStore.prepare("DELETE FROM Users WHERE email = ?").run(credentials.email))
 })
