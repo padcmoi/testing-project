@@ -3,7 +3,7 @@ import { globalRouter } from "@/router/globalRouter"
 // import { AppUserEntity } from "@/types/entities/user"
 
 export const UseAuthStore = defineStore("UseAuthStore", () => {
-  let intervalState: NodeJS.Timeout
+  let intervalState: number | undefined //: NodeJS.Timeout
 
   const currentUser = reactive({ loggedIn: false })
 
@@ -20,7 +20,6 @@ export const UseAuthStore = defineStore("UseAuthStore", () => {
   }
 
   function reset() {
-    localStorage.removeItem("refreshToken")
     localStorage.removeItem("accessToken")
 
     // Object.assign(currentUser, userDefaultSchema())

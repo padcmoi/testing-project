@@ -5,7 +5,6 @@ export type AxiosResponseData = {
   __toastify?: Array<{ message: Content; type: ToastType; timeout: number }>
 
   authorizationToken?: string
-  refreshToken?: string
 }
 
 export interface CustomAxiosResponse<T = AxiosResponseData, D = unknown> {
