@@ -144,6 +144,19 @@ describe("[GET] /api/auth/me", () => {
     expect(res.header.authorization).toEqual("")
     expect(res.body).toEqual({ success: false })
   })
+  test("check with invalid token", async () => {
+    const authorization = "aaa.bbb.ccc"
+
+    const res = await request(app)
+      .get("/api/auth/me")
+      .set("Authorization", authorization)
+      .set("Accept", "application/json")
+      .expect("Content-Type", /json/)
+      .expect(403)
+
+    expect(res.header.authorization).toEqual("")
+    expect(res.body).toEqual({ msg: "Token invalid" })
+  })
 
   afterAll(() => apiStore.prepare("DELETE FROM Users WHERE email = ?").run(credentials.email))
 })
