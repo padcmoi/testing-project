@@ -39,8 +39,8 @@ function responseSuccess(response: CustomAxiosResponse) {
   const authorization = response.headers.authorization as string | undefined
 
   if (authorization && authorization.split(".").length >= 3) {
-    // console.warn("++ New authorization token provided")
-    localStorage.setItem("accessToken", `Bearer ${authorization}`)
+    console.warn("++ New authorization token provided")
+    localStorage.setItem("accessToken", `${authorization}`)
   }
 
   commonResponse(response)

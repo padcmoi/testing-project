@@ -1,13 +1,15 @@
 describe("Header", () => {
-  const credentials = { email: "abc-test@localhost.com", password: "n9wb@DTJ.MLZ3" }
+  const credentials = { identifier: "abc-test@localhost.com", password: "n9wb@DTJ.MLZ3" }
 
-  it("visits the app root url", () => {
+  it("Connect to app", () => {
     cy.visit("/sign-in").viewport(1920, 1080)
 
-    cy.contains("h1", "Connexion")
-
-    cy.get("input[type=email]").type(credentials.email, { force: true })
-    cy.get("input[type=password]").type(credentials.password, { force: true })
+    cy.contains("h1", "Identification")
+    cy.get("label").eq(0).contains("Identifiant")
+    cy.get("input").eq(0).type(credentials.identifier)
+    cy.get("label").eq(1).contains("Mot de passe")
+    cy.get("input").eq(1).type(credentials.password)
+    cy.get("button").eq(0).click()
 
     // cy.intercept("http://localhost:3000/api/auth/sign-in", (req) => {
     //   req.on("response", (res) => {
@@ -29,7 +31,5 @@ describe("Header", () => {
       statusCode: 200,
       body: { data: { success: true } },
     })
-
-    cy.get("form").submit()
   })
 })

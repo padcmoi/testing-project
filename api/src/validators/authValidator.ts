@@ -1,24 +1,22 @@
 import { body } from "express-validator"
 import { apiStore } from "../db"
+import { slugify } from "../utils/tools"
 
 const strongPassword = { minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 0 }
 
 export const authValidator = {
   validators: {
-    email: body("email")
-      .isEmail()
-      .withMessage((_, meta) => "email invalide")
-      .custom(async (email: string | undefined, meta) => {
-        const user = (await apiStore.prepare("SELECT userId FROM Users WHERE email = ?").get(email ?? "")) as { userId: string } | undefined
-        if (user) throw new Error("Cet email est utilisé")
-      }),
+    identifier: body("identifier").custom(async (identifier: string | undefined, meta) => {
+      const user = (await apiStore.prepare("SELECT userId FROM Users WHERE identifier = ?").get(slugify(identifier ?? ""))) as { userId: string } | undefined
+      if (user) throw new Error("Cet identifier est utilisé")
+    }),
     password: body("password")
       .isStrongPassword(strongPassword)
       .withMessage((_, meta) => "Mot de passe non sécurisé, trop faible"),
   },
   sanitize: {
     me(keys: string[]) {
-      const allowedKeys: string[] = ["email"]
+      const allowedKeys: string[] = ["identifier"]
       const filteredKeys: string[] = []
 
       for (const key of keys) {
