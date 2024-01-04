@@ -1,12 +1,13 @@
 import { body } from "express-validator"
 import { apiStore } from "../db"
+import { slugify } from "src/utils/tools"
 
 const strongPassword = { minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 0 }
 
 export const authValidator = {
   validators: {
     identifier: body("identifier").custom(async (identifier: string | undefined, meta) => {
-      const user = (await apiStore.prepare("SELECT userId FROM Users WHERE identifier = ?").get(identifier ?? "")) as { userId: string } | undefined
+      const user = (await apiStore.prepare("SELECT userId FROM Users WHERE identifier = ?").get(slugify(identifier ?? ""))) as { userId: string } | undefined
       if (user) throw new Error("Cet identifier est utilisé")
     }),
     password: body("password")

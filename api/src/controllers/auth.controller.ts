@@ -1,7 +1,7 @@
 import { Request, Response } from "express"
 import { apiStore } from "../db"
 import { auth, verifyAuth } from "../middlewares/auth.middleware"
-import { bcrypt, generateUUID } from "../utils/tools"
+import { bcrypt, generateUUID, slugify } from "../utils/tools"
 import { authValidator } from "../validators/authValidator"
 import { matchedData, validationResult } from "express-validator"
 
@@ -35,9 +35,9 @@ export default {
         const { identifier, password } = matchedData(req) as { identifier: string; password: string }
 
         const hash = await bcrypt.hash(password ?? "")
-        await apiStore.prepare("INSERT INTO Users (userId, identifier, password) VALUES (?,?,?)").run(generateUUID(identifier), identifier, hash)
+        await apiStore.prepare("INSERT INTO Users (userId, identifier, password) VALUES (?,?,?)").run(generateUUID(identifier), slugify(identifier), hash)
 
-        const { userId } = (await apiStore.prepare("SELECT userId FROM Users WHERE identifier = ?").get(identifier)) as { userId: string }
+        const { userId } = (await apiStore.prepare("SELECT userId FROM Users WHERE identifier = ?").get(slugify(identifier))) as { userId: string }
         if (userId) {
           auth.sign(res, userId)
         }
@@ -47,9 +47,8 @@ export default {
     ],
 
     "/sign-in": [
-      authValidator.validators.identifier,
       async (req: Request, res: Response) => {
-        const user = (await apiStore.prepare("SELECT userId, password FROM Users WHERE identifier = ?").get(req.body.identifier ?? "")) as
+        const user = (await apiStore.prepare("SELECT userId, password FROM Users WHERE identifier = ?").get(slugify(req.body.identifier ?? ""))) as
           | { userId: string; password: string }
           | undefined
         if (!user || !bcrypt.matchSync(req.body.password ?? "", user.password)) {
