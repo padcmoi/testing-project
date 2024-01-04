@@ -310,6 +310,8 @@
     "uppercase": true,
     "globalRouter": true,
     "loadGlobalRouter": true,
-    "main": true
+    "main": true,
+    "navRoutes": true,
+    "routes": true
   }
 }
