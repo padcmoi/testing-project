@@ -26,7 +26,10 @@ describe("/api/auth/sign-up ", () => {
     expect(authorization.split(" ")[0]).toEqual("")
     expect(authorization.slice(7, authorization.length).split(".").length).toEqual(1)
 
-    expect(res.body).toEqual({ success: false, errors: ["Mot de passe non sécurisé, trop faible"] })
+    expect(res.body).toEqual({
+      success: false,
+      __toastify: [{ type: "error", message: "Mot de passe non sécurisé, trop faible" }],
+    })
   })
   test("Success, get Auth token", async () => {
     const res = await request(app).post("/api/auth/sign-up").send(credentials).set("Accept", "application/json").expect("Content-Type", /json/).expect(200)
@@ -36,7 +39,10 @@ describe("/api/auth/sign-up ", () => {
     expect(authorization.split(" ")[0]).toEqual("Bearer")
     expect(authorization.slice(7, authorization.length).split(".").length).toEqual(3)
 
-    expect(res.body).toEqual({ success: true })
+    expect(res.body).toEqual({
+      success: true,
+      __toastify: [{ type: "success", message: "Compte ajouté" }],
+    })
   })
   test("failed email exists", async () => {
     const res = await request(app).post("/api/auth/sign-up").send(credentials).set("Accept", "application/json").expect("Content-Type", /json/).expect(403)
@@ -46,7 +52,10 @@ describe("/api/auth/sign-up ", () => {
     expect(authorization.split(" ")[0]).toEqual("")
     expect(authorization.slice(7, authorization.length).split(".").length).toEqual(1)
 
-    expect(res.body).toEqual({ success: false, errors: ["Cet email est utilisé"] })
+    expect(res.body).toEqual({
+      success: false,
+      __toastify: [{ type: "error", message: "Cet email est utilisé" }],
+    })
   })
 
   afterAll(() => {
@@ -64,7 +73,10 @@ describe("/api/auth/sign-in ", () => {
     test("Response OK", async () => {
       const res = await request(app).post("/api/auth/sign-in").send(credentials).set("Accept", "application/json").expect("Content-Type", /json/).expect(201)
 
-      expect(res.body).toEqual({ success: true })
+      expect(res.body).toEqual({
+        success: true,
+        __toastify: [{ type: "success", message: "Connecté" }],
+      })
     })
 
     test("Token provided", async () => {
@@ -100,7 +112,10 @@ describe("/api/auth/sign-in ", () => {
 
     expect(res.header.authorization).toEqual("")
 
-    expect(res.body).toEqual({ success: false, errors: ["Identifiants erronés"] })
+    expect(res.body).toEqual({
+      success: false,
+      __toastify: [{ type: "error", message: "Identifiants erronés" }],
+    })
   })
   test("wrong password only", async () => {
     const res = await request(app)
@@ -112,7 +127,10 @@ describe("/api/auth/sign-in ", () => {
 
     expect(res.header.authorization).toEqual("")
 
-    expect(res.body).toEqual({ success: false, errors: ["Identifiants erronés"] })
+    expect(res.body).toEqual({
+      success: false,
+      __toastify: [{ type: "error", message: "Identifiants erronés" }],
+    })
   })
 
   afterAll(() => apiStore.prepare("DELETE FROM Users WHERE email = ?").run(credentials.email))
@@ -142,7 +160,10 @@ describe("[GET] /api/auth/me", () => {
       .expect(401)
 
     expect(res.header.authorization).toEqual("")
-    expect(res.body).toEqual({ success: false })
+    expect(res.body).toEqual({
+      success: false,
+      __toastify: [{ type: "error", message: "Déconnexion" }],
+    })
   })
   test("check with invalid token", async () => {
     const authorization = "aaa.bbb.ccc"
