@@ -23,7 +23,7 @@
 
       <todo-list v-model="todos" :identifier="currentUser.identifier"></todo-list>
 
-      {{ todos }}
+      <!-- {{ todos }} -->
 
       <!--  -->
     </div>

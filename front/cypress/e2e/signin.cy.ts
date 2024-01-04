@@ -31,7 +31,5 @@ describe("Header", () => {
       statusCode: 200,
       body: { data: { success: true } },
     })
-
-    cy.get("form").submit()
   })
 })
