@@ -1,6 +1,6 @@
 import { body } from "express-validator"
 import { apiStore } from "../db"
-import { slugify } from "src/utils/tools"
+import { slugify } from "../utils/tools"
 
 const strongPassword = { minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 0 }
 

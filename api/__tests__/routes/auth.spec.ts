@@ -6,7 +6,7 @@ import { bcrypt, generateUUID } from "../../src/utils/tools"
 import { auth } from "../../src/middlewares/auth.middleware"
 import { sign } from "jsonwebtoken"
 
-const credentials = { identifier: "abc-test@localhost.com", password: "n9wb@DTJ.MLZ3" }
+const credentials = { identifier: "abc-testlocalhostcom", password: "n9wb@DTJ.MLZ3" }
 
 describe("/api/auth/sign-up ", () => {
   beforeAll(() => {
