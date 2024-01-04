@@ -56,7 +56,7 @@ export const verifyAuth = async (req: Request, res: Response, next: NextFunction
   auth.verify(authorization)
 
   if (!auth.isValid()) {
-    return res.status(401).json({ success: false })
+    return res.status(401).json({ success: false, __toastify: [{ type: "error", message: "Déconnexion" }] })
   } else if (auth.isRenewable()) {
     auth.sign(res, auth.payload.userId)
   }

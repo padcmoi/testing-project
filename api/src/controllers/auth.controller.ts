@@ -23,9 +23,9 @@ export default {
         if (!validationResult(req).isEmpty()) {
           return res.status(403).json({
             success: false,
-            errors: validationResult(req)
+            __toastify: validationResult(req)
               .array()
-              .map((error) => error.msg),
+              .map((error) => ({ type: "error", message: error.msg })),
           })
         }
 
@@ -40,7 +40,7 @@ export default {
           auth.sign(res, userId)
         }
 
-        res.status(200).json({ success: true })
+        res.status(200).json({ success: true, __toastify: [{ type: "success", message: "Compte ajouté" }] })
       },
     ],
 
@@ -51,11 +51,11 @@ export default {
           | { userId: string; password: string }
           | undefined
         if (!user || !bcrypt.matchSync(req.body.password ?? "", user.password)) {
-          res.status(401).json({ success: false, errors: ["Identifiants erronés"] })
+          res.status(401).json({ success: false, __toastify: [{ type: "error", message: "Identifiants erronés" }] })
         } else {
           auth.sign(res, user.userId)
 
-          res.status(201).json({ success: true })
+          res.status(201).json({ success: true, __toastify: [{ type: "success", message: "Connecté" }] })
         }
       },
     ],
