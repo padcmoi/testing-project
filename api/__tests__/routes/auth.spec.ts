@@ -6,17 +6,17 @@ import { bcrypt, generateUUID } from "../../src/utils/tools"
 import { auth } from "../../src/middlewares/auth.middleware"
 import { sign } from "jsonwebtoken"
 
-const credentials = { email: "abc-test@localhost.com", password: "n9wb@DTJ.MLZ3" }
+const credentials = { identifier: "abc-test@localhost.com", password: "n9wb@DTJ.MLZ3" }
 
 describe("/api/auth/sign-up ", () => {
   beforeAll(() => {
-    apiStore.prepare("DELETE FROM Users WHERE email = ?").run(credentials.email)
+    apiStore.prepare("DELETE FROM Users WHERE identifier = ?").run(credentials.identifier)
   })
 
   test("failed low password", async () => {
     const res = await request(app)
       .post("/api/auth/sign-up")
-      .send({ email: credentials.email, password: "low" })
+      .send({ identifier: credentials.identifier, password: "low" })
       .set("Accept", "application/json")
       .expect("Content-Type", /json/)
       .expect(403)
@@ -44,7 +44,7 @@ describe("/api/auth/sign-up ", () => {
       __toastify: [{ type: "success", message: "Compte ajouté" }],
     })
   })
-  test("failed email exists", async () => {
+  test("failed identifier exists", async () => {
     const res = await request(app).post("/api/auth/sign-up").send(credentials).set("Accept", "application/json").expect("Content-Type", /json/).expect(403)
 
     const authorization = res.header.authorization
@@ -54,19 +54,21 @@ describe("/api/auth/sign-up ", () => {
 
     expect(res.body).toEqual({
       success: false,
-      __toastify: [{ type: "error", message: "Cet email est utilisé" }],
+      __toastify: [{ type: "error", message: "Cet identifier est utilisé" }],
     })
   })
 
   afterAll(() => {
-    apiStore.prepare("DELETE FROM Users WHERE email = ?").run(credentials.email)
+    apiStore.prepare("DELETE FROM Users WHERE identifier = ?").run(credentials.identifier)
   })
 })
 
 describe("/api/auth/sign-in ", () => {
   beforeAll(async () => {
     const hash = await bcrypt.hash(credentials.password)
-    await apiStore.prepare("INSERT INTO Users (userId, email, password) VALUES (?,?,?)").run(generateUUID(credentials.email), credentials.email, hash)
+    await apiStore
+      .prepare("INSERT INTO Users (userId, identifier, password) VALUES (?,?,?)")
+      .run(generateUUID(credentials.identifier), credentials.identifier, hash)
   })
 
   describe("loggedIn successfull", () => {
@@ -96,16 +98,16 @@ describe("/api/auth/sign-in ", () => {
 
       auth.verify(authorization)
 
-      const user = apiStore.prepare("SELECT email FROM Users WHERE userId = ?").get(auth.payload.userId) as { email: string } | undefined
+      const user = apiStore.prepare("SELECT identifier FROM Users WHERE userId = ?").get(auth.payload.userId) as { identifier: string } | undefined
 
-      expect(user?.email).toEqual(credentials.email)
+      expect(user?.identifier).toEqual(credentials.identifier)
     })
   })
 
-  test("wrong email only or inexists", async () => {
+  test("wrong identifier only or inexists", async () => {
     const res = await request(app)
       .post("/api/auth/sign-in")
-      .send({ email: "abc7@localhost.com", password: credentials.password })
+      .send({ identifier: "abc7@localhost.com", password: credentials.password })
       .set("Accept", "application/json")
       .expect("Content-Type", /json/)
       .expect(401)
@@ -120,7 +122,7 @@ describe("/api/auth/sign-in ", () => {
   test("wrong password only", async () => {
     const res = await request(app)
       .post("/api/auth/sign-in")
-      .send({ email: credentials.email, password: "123" })
+      .send({ identifier: credentials.identifier, password: "123" })
       .set("Accept", "application/json")
       .expect("Content-Type", /json/)
       .expect(401)
@@ -133,13 +135,15 @@ describe("/api/auth/sign-in ", () => {
     })
   })
 
-  afterAll(() => apiStore.prepare("DELETE FROM Users WHERE email = ?").run(credentials.email))
+  afterAll(() => apiStore.prepare("DELETE FROM Users WHERE identifier = ?").run(credentials.identifier))
 })
 
 describe("[GET] /api/auth/me", () => {
   beforeAll(async () => {
     const hash = await bcrypt.hash(credentials.password)
-    await apiStore.prepare("INSERT INTO Users (userId, email, password) VALUES (?,?,?)").run(generateUUID(credentials.email), credentials.email, hash)
+    await apiStore
+      .prepare("INSERT INTO Users (userId, identifier, password) VALUES (?,?,?)")
+      .run(generateUUID(credentials.identifier), credentials.identifier, hash)
   })
 
   test("check with no token provide", async () => {
@@ -149,7 +153,7 @@ describe("[GET] /api/auth/me", () => {
     expect(res.body).toEqual({ msg: "No token provided" })
   })
   test("check with token expired", async () => {
-    const user = apiStore.prepare("SELECT userId FROM Users WHERE email = ?").get(credentials.email) as { userId: string } | undefined
+    const user = apiStore.prepare("SELECT userId FROM Users WHERE identifier = ?").get(credentials.identifier) as { userId: string } | undefined
     const authorization = sign({ userId: user?.userId, renew: 0 }, "gY4J3gaauRU9nE3CUpn6LetE0", { expiresIn: 0 })
 
     const res = await request(app)
@@ -180,7 +184,7 @@ describe("[GET] /api/auth/me", () => {
   })
 
   test("valid token, not expired and renewable", async () => {
-    const user = apiStore.prepare("SELECT userId FROM Users WHERE email = ?").get(credentials.email) as { userId: string } | undefined
+    const user = apiStore.prepare("SELECT userId FROM Users WHERE identifier = ?").get(credentials.identifier) as { userId: string } | undefined
     const authorization = sign({ userId: user?.userId, renew: 0 }, "gY4J3gaauRU9nE3CUpn6LetE0", { expiresIn: 30 })
 
     const res = await request(app).get("/api/auth/me").set("Authorization", authorization).set("Accept", "application/json").expect("Content-Type", /json/)
@@ -190,5 +194,5 @@ describe("[GET] /api/auth/me", () => {
     expect(_authorization.slice(7, _authorization.length).split(".").length).toEqual(3)
   })
 
-  afterAll(() => apiStore.prepare("DELETE FROM Users WHERE email = ?").run(credentials.email))
+  afterAll(() => apiStore.prepare("DELETE FROM Users WHERE identifier = ?").run(credentials.identifier))
 })

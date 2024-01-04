@@ -61,5 +61,7 @@ export const verifyAuth = async (req: Request, res: Response, next: NextFunction
     auth.sign(res, auth.payload.userId)
   }
 
+  req.userId = auth.payload.userId
+
   next()
 }

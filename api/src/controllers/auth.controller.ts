@@ -10,14 +10,16 @@ export default {
     "/me": [
       verifyAuth,
       async (req: Request, res: Response) => {
-        res.status(200).json({ success: true })
+        const user = await apiStore.prepare("SELECT identifier FROM Users WHERE userId = ?").get(req.userId)
+
+        res.status(200).json({ success: true, user: user ? user : null })
       },
     ],
   },
 
   POST: {
     "/sign-up": [
-      authValidator.validators.email,
+      authValidator.validators.identifier,
       authValidator.validators.password,
       async (req: Request, res: Response) => {
         if (!validationResult(req).isEmpty()) {
@@ -30,12 +32,12 @@ export default {
         }
 
         await authValidator.sanitize.me(Object.keys(req.body)).run(req)
-        const { email, password } = matchedData(req) as { email: string; password: string }
+        const { identifier, password } = matchedData(req) as { identifier: string; password: string }
 
         const hash = await bcrypt.hash(password ?? "")
-        await apiStore.prepare("INSERT INTO Users (userId, email, password) VALUES (?,?,?)").run(generateUUID(email), email, hash)
+        await apiStore.prepare("INSERT INTO Users (userId, identifier, password) VALUES (?,?,?)").run(generateUUID(identifier), identifier, hash)
 
-        const { userId } = (await apiStore.prepare("SELECT userId FROM Users WHERE email = ?").get(email)) as { userId: string }
+        const { userId } = (await apiStore.prepare("SELECT userId FROM Users WHERE identifier = ?").get(identifier)) as { userId: string }
         if (userId) {
           auth.sign(res, userId)
         }
@@ -45,9 +47,9 @@ export default {
     ],
 
     "/sign-in": [
-      authValidator.validators.email,
+      authValidator.validators.identifier,
       async (req: Request, res: Response) => {
-        const user = (await apiStore.prepare("SELECT userId, password FROM Users WHERE email = ?").get(req.body.email ?? "")) as
+        const user = (await apiStore.prepare("SELECT userId, password FROM Users WHERE identifier = ?").get(req.body.identifier ?? "")) as
           | { userId: string; password: string }
           | undefined
         if (!user || !bcrypt.matchSync(req.body.password ?? "", user.password)) {
