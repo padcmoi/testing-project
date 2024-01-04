@@ -1,23 +1,32 @@
 <script lang="ts" setup>
-  async function submitForm() {
-    await api.post("/api/auth/sign-up", {})
+  const { auth } = UseAuthStore()
+
+  const form = reactive<{ identifier: string; password: string }>({ identifier: "", password: "" })
+
+  function submitForm() {
+    api
+      .post("/api/auth/sign-up", form)
+      .then(({ data }) => {
+        if (data.success) auth()
+      })
+      .catch(({ data }) => console.error(data))
   }
 </script>
 
 <template>
-  <div class="container-fluid row">
+  <div class="container-fluid row align-items-center">
     <div class="col-0 col-lg-3"></div>
     <div class="col-12 col-lg-6 maxWidth mx-auto">
       <form @submit.prevent="submitForm">
-        <h1 class="my-5">Création de compte</h1>
+        <h1 class="my-5">Nouvelle liste</h1>
+
         <div class="mb-3">
-          <label for="inputemail" class="form-label">Email address</label>
-          <input type="email" class="form-control" id="inputemail" aria-describedby="emailHelp" />
-          <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+          <label for="inputidentifier" class="form-label">Choisissez un identifiant</label>
+          <input v-model="form.identifier" type="text" class="form-control" id="inputidentifier" />
         </div>
         <div class="mb-3">
-          <label for="inputpassword" class="form-label">Password</label>
-          <input type="password" class="form-control" id="inputpassword" />
+          <label for="inputpassword" class="form-label">Mot de passe</label>
+          <input v-model="form.password" type="password" class="form-control" id="inputpassword" />
         </div>
 
         <button type="submit" class="btn btn-primary mt-3">Création</button>

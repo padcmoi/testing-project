@@ -312,6 +312,7 @@
     "loadGlobalRouter": true,
     "main": true,
     "navRoutes": true,
-    "routes": true
+    "routes": true,
+    "slugify": true
   }
 }

@@ -1,9 +1,8 @@
 import type { RouteLocationNamedRaw, RouteRecordRaw } from "vue-router"
 
 export const navRoutes: { label: string; to: RouteLocationNamedRaw }[] = [
-  { label: "Se connecter", to: { name: "SignIn" } },
-  { label: "Créer un compte", to: { name: "SignUp" } },
-  { label: "Mon compte", to: { name: "Account" } },
+  { label: "S'identifier", to: { name: "SignIn" } },
+  { label: "Ajouter une Liste", to: { name: "SignUp" } },
   { label: "Todo liste", to: { name: "Todos" } },
 ]
 
@@ -27,13 +26,6 @@ export const routes: readonly RouteRecordRaw[] = [
     name: "SignUp",
     component: () => import("../pages/signup.vue"),
     meta: { requiresAnonymous: true, requiresAuth: false },
-    children: [],
-  },
-  {
-    path: "/account",
-    name: "Account",
-    component: () => import("../pages/account.vue"),
-    meta: { requiresAnonymous: false, requiresAuth: true },
     children: [],
   },
   {

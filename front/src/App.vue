@@ -1,7 +1,10 @@
 <script setup lang="ts">
   import { storeToRefs } from "pinia"
   import { RouterLink, RouterView } from "vue-router"
+  import { loadGlobalRouter } from "./router/globalRouter"
+  loadGlobalRouter()
 
+  const { reset } = UseAuthStore()
   const { currentUser } = storeToRefs(UseAuthStore())
   const route = useRoute()
   const router = useRouter()
@@ -30,15 +33,22 @@
 <template>
   <header>
     <nav class="m-1">
-      <ul class="nav nav-pills">
-        <li class="nav-item" v-for="(route, i) of navigation" :key="i">
-          <RouterLink :class="['nav-link', route.activeRoute]" :to="route.to">{{ route.label }}</RouterLink>
-        </li>
-      </ul>
+      <div class="d-flex">
+        <div class="p-2">
+          <ul class="nav nav-pills">
+            <li class="nav-item" v-for="(route, i) of navigation" :key="i">
+              <RouterLink :class="['nav-link', 'text-light', route.activeRoute]" :to="route.to">{{ route.label }}</RouterLink>
+            </li>
+            <li v-if="currentUser.loggedIn" class="nav-item">
+              <a type="button" :class="['nav-link', 'text-light']" @click="reset()">Déconnexion</a>
+            </li>
+          </ul>
+        </div>
+      </div>
     </nav>
   </header>
 
-  <main class="container-fluid vh90 d-flex align-items-center">
+  <main class="container-fluid vh90 d-flex">
     <RouterView></RouterView>
   </main>
 
@@ -49,10 +59,6 @@
   body {
     background: #333;
     color: white;
-  }
-
-  nav a {
-    color: white !important;
   }
 
   .vh90 {

@@ -1,17 +1,16 @@
 import { defineStore } from "pinia"
 import { globalRouter } from "@/router/globalRouter"
-// import { AppUserEntity } from "@/types/entities/user"
+import type { UserEntity, UserEntityResponse } from "@/types/UserEntity"
 
 export const UseAuthStore = defineStore("UseAuthStore", () => {
   let intervalState: number | undefined //: NodeJS.Timeout
 
-  const currentUser = reactive({ loggedIn: false })
+  const currentUser = reactive<UserEntity>({ loggedIn: false, identifier: "" })
 
   function auth() {
     console.log("Auth...")
     loadData().then(() => {
-      const lastFullPath = localStorage.getItem("lastFullPath")
-      globalRouter.router?.push(lastFullPath ? lastFullPath : { name: "PanelRidingCenters" })
+      globalRouter.router?.push({ name: "Todos" })
     })
   }
 
@@ -21,38 +20,39 @@ export const UseAuthStore = defineStore("UseAuthStore", () => {
 
   function reset() {
     localStorage.removeItem("accessToken")
-
-    // Object.assign(currentUser, userDefaultSchema())
-
+    Object.assign(currentUser, { loggedIn: false, identifier: "" })
     globalRouter.router?.push({ name: "SignIn" })
   }
 
   async function loadData() {
-    if (!localStorage.getItem("accessToken")) return
+    if (!localStorage.getItem("accessToken")) return currentUser
 
-    const { data } = await api.get("/api/account/me")
+    return api
+      .get<UserEntityResponse>("/api/auth/me")
+      .then(({ data }) => {
+        if (data.success) {
+          currentUser.loggedIn = true
+          Object.assign(currentUser, data.user)
+        } else {
+          localStorage.removeItem("accessToken")
+          currentUser.loggedIn = false
+        }
 
-    if (data) {
-      currentUser.loggedIn = true
-      Object.assign(currentUser, data)
-    } else {
-      localStorage.removeItem("accessToken")
-      currentUser.loggedIn = false
-    }
+        return currentUser
+      })
+      .catch(() => {
+        localStorage.removeItem("accessToken")
+        currentUser.loggedIn = false
+
+        return currentUser
+      })
   }
 
   onMounted(() => {
     clearInterval(intervalState)
     intervalState = setInterval(() => {
       if (!localStorage.getItem("accessToken")) return
-      if (currentUser.loggedIn) api.get("/api/account/me")
-      //   .then(({ data }) => {
-      //   if (data) {
-      //     currentUser.loggedIn = true
-      //     Object.assign(currentUser, data)
-      //     currentUser.avatar = { type: "image", value: "https://cdn.vuetifyjs.com/images/profiles/marcus.jpg" } //TODO to implement later
-      //   }
-      // })
+      if (currentUser.loggedIn) loadData()
     }, 10000)
   })
 
