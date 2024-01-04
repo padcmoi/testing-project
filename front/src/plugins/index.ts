@@ -5,7 +5,6 @@
  */
 
 // common css
-import "../assets/main.css"
 
 // Plugins
 
