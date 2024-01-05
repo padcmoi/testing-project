@@ -1,3 +1,4 @@
+<!-- eslint-disable @typescript-eslint/no-unused-vars -->
 <script lang="ts" setup>
   import type { Todo } from "@/types/Todo"
   import TodoList from "../components/TodoList.vue"
@@ -5,26 +6,51 @@
 
   const { currentUser } = storeToRefs(UseAuthStore())
 
-  const todos = ref<Todo[]>([
-    { id: "_id_1", label: "Lorem", status: false },
-    { id: "_id_2", label: "ipsum", status: true },
-    { id: "_id_3", label: "dolor", status: false },
-    { id: "_id_4", label: "sit", status: true },
-    { id: "_id_5", label: "amet", status: false },
-    { id: "_id_6", label: "consectetur", status: false },
-  ])
+  const loading = ref<boolean>(true)
+  const todos = ref<Todo[]>([])
+
+  function loadData() {
+    todoController
+      .getTodos()
+      .then((data) => {
+        if (data.success) {
+          todos.value = data.todo
+          loading.value = false
+        }
+      })
+      .catch(() => (loading.value = false))
+  }
+
+  function addItem(label: string) {
+    todoController.addTodo(label).then((data) => {
+      if (data.success) loadData()
+    })
+  }
+  function change(todo: Todo) {
+    todoController.changeTodo(todo.id, todo.status)
+  }
+  function remove(todo: Todo) {
+    todoController.removeTodo(todo.id).then((data) => {
+      if (data.success) loadData()
+    })
+  }
+  function uncheckAll() {
+    todoController.changeAllTodos(false).then((data) => {
+      if (data.success) loadData()
+    })
+  }
+
+  onBeforeMount(() => {
+    loadData()
+  })
 </script>
 
 <template>
-  <div class="container-fluid row">
+  <div class="container-fluid row" v-show="!loading">
     <div class="col-0 col-lg-2"></div>
     <div class="col-12 col-lg-8 maxWidth mt-5 mx-auto">
       <!--  -->
-
-      <todo-list v-model="todos" :identifier="currentUser.identifier"></todo-list>
-
-      <!-- {{ todos }} -->
-
+      <todo-list v-model="todos" :identifier="currentUser.identifier" @add-item="addItem" @change="change" @remove="remove" @unchecked-all="uncheckAll" />
       <!--  -->
     </div>
     <div class="col-0 col-lg-2"></div>

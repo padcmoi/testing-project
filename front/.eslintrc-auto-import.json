@@ -313,6 +313,7 @@
     "main": true,
     "navRoutes": true,
     "routes": true,
-    "slugify": true
+    "slugify": true,
+    "todoController": true
   }
 }

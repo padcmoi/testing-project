@@ -35,6 +35,7 @@ describe("TodoList", () => {
     // check add todo then submit and check emit result
     cy.get("input[type=text]").type("Testing ...")
     cy.get("button.btn.btn-primary").eq(0).click()
+    cy.get("input[type=text]").should("have.value", "")
     cy.get("@onAddItemSpy").should("have.been.calledWith", "Testing ...")
 
     // checked all todos
