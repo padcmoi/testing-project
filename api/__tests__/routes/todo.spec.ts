@@ -9,6 +9,7 @@ const credentials = { identifier: "abc-testlocalhostcom", password: "n9wb@DTJ.ML
 describe("Todo controller", () => {
   let authorization: string
   let itemId: string
+  let userId: string
 
   beforeAll(async () => {
     await apiStore.prepare("DELETE FROM Users WHERE identifier = ?").run(credentials.identifier)
@@ -73,7 +74,7 @@ describe("Todo controller", () => {
   })
 
   describe("[PUT] /api/todo/:todoId", () => {
-    test("change itemId as valid", async () => {
+    test("check itemId as valid", async () => {
       expect(validateUUID(itemId)).toBeTruthy()
     })
     test("change status an item with an id doesnt exist (/api/todo/___id-doesnt-exist)", async () => {
@@ -112,8 +113,29 @@ describe("Todo controller", () => {
       expect(res.body.success).toBeTruthy()
 
       // check expected result 1 == status true
-      const exists = (await apiStore.prepare("SELECT status FROM Todos WHERE todoId = ?").get(itemId)) as { status: number } | undefined
+      const exists = (await apiStore.prepare("SELECT userId,status FROM Todos WHERE todoId = ?").get(itemId)) as { userId: string; status: number } | undefined
+      if (exists) userId = exists.userId
       expect(exists?.status).toEqual(1)
+    })
+  })
+
+  describe("[PUT] /api/todo", () => {
+    test("check userId as valid", async () => {
+      expect(validateUUID(userId)).toBeTruthy()
+    })
+    test("change status false each items and matching my auth token and check the right value in Database", async () => {
+      const res = await request(app)
+        .put("/api/todo")
+        .send({ status: false })
+        .set("Authorization", authorization)
+        .set("Accept", "application/json")
+        .expect("Content-Type", /json/)
+        .expect(404)
+
+      expect(res.body.success).toBeTruthy()
+
+      const todos = (await apiStore.prepare("SELECT status FROM Todos WHERE userId = ?").all(userId)) as { status: number }[]
+      expect(todos.map((todo) => `${todo.status}`).includes("1") || todos.length == 0).toBeFalsy()
     })
   })
 
