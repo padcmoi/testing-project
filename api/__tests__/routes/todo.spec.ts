@@ -57,10 +57,14 @@ describe("Todo controller", () => {
         .expect("Content-Type", /json/)
         .expect(200)
 
-      expect(res.body).toEqual({
-        success: true,
-        todo: [],
-      })
+      const { success, todo } = res.body as { success: boolean; todo: { id: string; label: string; status: boolean }[] }
+
+      expect(success).toBeTruthy()
+      expect(todo.map(({ id, label, status }) => ({ id: typeof id, label, status }))).toEqual([
+        { id: "string", label: "test-1", status: false },
+        { id: "string", label: "test-2", status: false },
+        { id: "string", label: "test-3", status: false },
+      ])
     })
   })
 
