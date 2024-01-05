@@ -130,7 +130,7 @@ describe("Todo controller", () => {
         .set("Authorization", authorization)
         .set("Accept", "application/json")
         .expect("Content-Type", /json/)
-        .expect(404)
+        .expect(200)
 
       expect(res.body.success).toBeTruthy()
 
