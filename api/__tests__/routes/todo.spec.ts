@@ -33,9 +33,17 @@ describe("Todo controller", () => {
     expect(authorization.slice(7, authorization.length).split(".").length).toEqual(3)
   })
 
-  describe("[GET] /api/todo/:todoId", () => {
-    test("returns the list matching my auth token", async () => {
-      expect("").toEqual("")
+  describe("[GET] /api/todo", () => {
+    test("returns the list matching my auth token", () => {
+      request(app)
+        .get("/api/todo")
+        .set("Authorization", authorization)
+        .set("Accept", "application/json")
+        .expect("Content-Type", /json/)
+        .expect(200)
+        .then((res) => {
+          expect("").toEqual("")
+        })
     })
   })
 
