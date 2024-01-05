@@ -2,12 +2,13 @@ import request from "supertest"
 
 import app from "../../src/app"
 import { apiStore } from "../../src/db"
-import { bcrypt, generateUUID } from "../../src/utils/tools"
+import { bcrypt, generateUUID, validateUUID } from "../../src/utils/tools"
 
 const credentials = { identifier: "abc-testlocalhostcom", password: "n9wb@DTJ.MLZ3" }
 
 describe("Todo controller", () => {
   let authorization: string
+  let itemId: string
 
   beforeAll(async () => {
     await apiStore.prepare("DELETE FROM Users WHERE identifier = ?").run(credentials.identifier)
@@ -59,12 +60,56 @@ describe("Todo controller", () => {
 
       const { success, todo } = res.body as { success: boolean; todo: { id: string; label: string; status: boolean }[] }
 
+      expect(typeof todo[1].id).toEqual("string")
       expect(success).toBeTruthy()
       expect(todo.map(({ id, label, status }) => ({ id: typeof id, label, status }))).toEqual([
         { id: "string", label: "test-1", status: false },
         { id: "string", label: "test-2", status: false },
         { id: "string", label: "test-3", status: false },
       ])
+
+      itemId = todo[1].id
+    })
+  })
+
+  describe("[PUT] /api/todo/:todoId", () => {
+    test("change itemId as valid", async () => {
+      expect(validateUUID(itemId)).toBeTruthy()
+    })
+    test("change status an item with an id doesnt exist (/api/todo/___id-doesnt-exist)", async () => {
+      const res = await request(app)
+        .put("/api/todo/___id-doesnt-exist")
+        .send({ status: true })
+        .set("Authorization", authorization)
+        .set("Accept", "application/json")
+        .expect("Content-Type", /json/)
+        .expect(404)
+
+      expect(res.body.success).toBeFalsy()
+      expect(res.body.__toastify).toEqual([{ type: "error", message: "Ce TODO n'existe pas ou a été supprimé" }])
+    })
+    test("change status an item by the id with a status not boolean", async () => {
+      const res = await request(app)
+        .put(`/api/todo/${itemId}`)
+        .send({ status: 1 })
+        .set("Authorization", authorization)
+        .set("Accept", "application/json")
+        .expect("Content-Type", /json/)
+        .expect(403)
+
+      expect(res.body.success).toBeFalsy()
+      expect(res.body.__toastify).toEqual([{ type: "error", message: "Le status de l'item doit être un boolean" }])
+    })
+    test("change status an item by the id and matching my auth token", async () => {
+      const res = await request(app)
+        .put(`/api/todo/${itemId}`)
+        .send({ status: true })
+        .set("Authorization", authorization)
+        .set("Accept", "application/json")
+        .expect("Content-Type", /json/)
+        .expect(200)
+
+      expect(res.body.success).toBeTruthy()
     })
   })
 

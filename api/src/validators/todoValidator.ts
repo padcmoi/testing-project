@@ -5,6 +5,10 @@ export const todoValidator = {
     label: body("label")
       .isEmpty()
       .withMessage((_, meta) => "La todo ne peut être vide"),
+
+    status: body("status")
+      .isBoolean({ strict: true })
+      .withMessage((_, meta) => "Le status de l'item doit être un boolean"),
   },
   sanitize: {
     me(keys: string[]) {

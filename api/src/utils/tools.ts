@@ -1,9 +1,14 @@
 import _bcrypt from "bcrypt"
-import { v5 as uuidv5 } from "uuid"
+import { v5 as uuidv5, version as uuidVersion, validate as uuidValidate } from "uuid"
 
 // Create UUID with V5
 export const generateUUID = (id: string | number, random: boolean = true, namespace: string = "659c6952-3586-51f6-a652-515b77539136") => {
   return uuidv5(`${id}-${random ? Math.floor(Math.random() * 65535) * Math.floor(Math.random() * 65535) : ""}`, namespace)
+}
+
+// Check UUID v5 and return true if match
+export const validateUUID = (uuid: string) => {
+  return uuidValidate(uuid) && uuidVersion(uuid) === 5
 }
 
 const saltRounds = 10
