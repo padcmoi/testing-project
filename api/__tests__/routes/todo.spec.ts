@@ -140,6 +140,24 @@ describe("Todo controller", () => {
       expect(todos.map((todo) => `${todo.status}`).includes(status ? "0" : "1") || todos.length == 0).toBeFalsy()
     })
   })
+  describe("[DELETE] /api/todo", () => {
+    test("check userId as valid", async () => {
+      expect(validateUUID(userId)).toBeTruthy()
+    })
+    test("remove item and check the result in the Database", async () => {
+      const res = await request(app)
+        .delete(`/api/todo/${itemId}`)
+        .set("Authorization", authorization)
+        .set("Accept", "application/json")
+        .expect("Content-Type", /json/)
+        .expect(200)
+
+      expect(res.body.success).toBeTruthy()
+
+      const todos = await apiStore.prepare("SELECT status FROM Todos WHERE userId = ?").all(userId)
+      expect(todos.length).toEqual(2)
+    })
+  })
 
   // afterAll(() => apiStore.prepare("DELETE FROM Users WHERE identifier = ?").run(credentials.identifier))
 })

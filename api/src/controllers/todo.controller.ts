@@ -112,5 +112,26 @@ export default {
 
   PATCH: {},
 
-  DELETE: {},
+  DELETE: {
+    "/:todoId": [
+      verifyAuth,
+      async (req: Request, res: Response) => {
+        const userId = req.userId
+        const todoId = req.params.todoId as string
+        if (!userId) return res.status(500).json({ success: false, __toastify: [{ type: "error", message: "Internal server error" }] })
+
+        const exists = await apiStore.prepare("SELECT todoId FROM Todos WHERE todoId = ? AND userId = ?").get(todoId, userId)
+        if (!exists) {
+          return res.status(404).json({
+            success: false,
+            __toastify: [{ type: "error", message: "Ce TODO n'existe pas ou a été supprimé" }],
+          })
+        }
+
+        await apiStore.prepare("DELETE FROM Todos WHERE todoId = ? AND userId = ?").run(todoId, userId)
+
+        res.status(200).json({ success: true })
+      },
+    ],
+  },
 }
