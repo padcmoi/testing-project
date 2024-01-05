@@ -56,6 +56,8 @@
       </li>
     </ul>
 
+    <div v-if="modelValue.length == 0">Aucun TODO</div>
+
     <div class="input-group mt-5">
       <input type="text" class="form-control" placeholder="Ajouter une TODO" v-model="item" />
       <button class="btn btn-primary" type="button" @click="addItem">Ajouter</button>
