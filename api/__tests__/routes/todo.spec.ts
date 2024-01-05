@@ -33,6 +33,21 @@ describe("Todo controller", () => {
     expect(authorization.slice(7, authorization.length).split(".").length).toEqual(3)
   })
 
+  describe("[POST] /api/todo", () => {
+    test("create 3 new todo with my auth token", async () => {
+      for (let index = 0; index < 3; index++) {
+        const res = await request(app)
+          .post("/api/todo")
+          .send({ label: `test-${index + 1}` })
+          .set("Authorization", authorization)
+          .set("Accept", "application/json")
+          .expect("Content-Type", /json/)
+          .expect(201)
+
+        expect(res.body).toEqual({ success: true })
+      }
+    })
+  })
   describe("[GET] /api/todo", () => {
     test("returns the list matching my auth token", async () => {
       const res = await request(app)
@@ -49,5 +64,5 @@ describe("Todo controller", () => {
     })
   })
 
-  afterAll(() => apiStore.prepare("DELETE FROM Users WHERE identifier = ?").run(credentials.identifier))
+  // afterAll(() => apiStore.prepare("DELETE FROM Users WHERE identifier = ?").run(credentials.identifier))
 })
