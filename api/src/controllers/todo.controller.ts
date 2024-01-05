@@ -51,6 +51,30 @@ export default {
   },
 
   PUT: {
+    "/": [
+      verifyAuth,
+      todoValidator.validators.status,
+      async (req: Request, res: Response) => {
+        const userId = req.userId
+        if (!userId) return res.status(500).json({ success: false, __toastify: [{ type: "error", message: "Internal server error" }] })
+
+        if (!validationResult(req).isEmpty()) {
+          return res.status(403).json({
+            success: false,
+            __toastify: validationResult(req)
+              .array()
+              .map((error) => ({ type: "error", message: error.msg })),
+          })
+        }
+
+        await todoValidator.sanitize.me(Object.keys(req.body)).run(req)
+        const { status } = matchedData(req) as { status?: boolean }
+
+        apiStore.prepare("UPDATE Todos SET status = ? WHERE userId = ?").run(status ? 1 : 0, userId)
+
+        res.status(200).json({ success: true })
+      },
+    ],
     "/:todoId": [
       verifyAuth,
       todoValidator.validators.status,

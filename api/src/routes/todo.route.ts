@@ -8,6 +8,7 @@ router.get("/", todoController.GET["/"])
 
 router.post("/", todoController.POST["/"])
 
+router.put("/", todoController.PUT["/"])
 router.put("/:todoId", todoController.PUT["/:todoId"])
 
 export default router
