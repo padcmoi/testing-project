@@ -34,16 +34,18 @@ describe("Todo controller", () => {
   })
 
   describe("[GET] /api/todo", () => {
-    test("returns the list matching my auth token", () => {
-      request(app)
+    test("returns the list matching my auth token", async () => {
+      const res = await request(app)
         .get("/api/todo")
         .set("Authorization", authorization)
         .set("Accept", "application/json")
         .expect("Content-Type", /json/)
         .expect(200)
-        .then((res) => {
-          expect("").toEqual("")
-        })
+
+      expect(res.body).toEqual({
+        success: true,
+        todo: [],
+      })
     })
   })
 
