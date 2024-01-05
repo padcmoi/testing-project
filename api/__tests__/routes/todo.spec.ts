@@ -4,7 +4,7 @@ import app from "../../src/app"
 import { apiStore } from "../../src/db"
 import { bcrypt, generateUUID, validateUUID } from "../../src/utils/tools"
 
-const credentials = { identifier: "abc-testlocalhostcom", password: "n9wb@DTJ.MLZ3" }
+const credentials = { identifier: "abc-testtodolocalhostcom", password: "n9wb@DTJ.MLZ3" }
 
 describe("Todo controller", () => {
   let authorization: string
