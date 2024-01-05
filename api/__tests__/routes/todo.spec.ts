@@ -159,5 +159,5 @@ describe("Todo controller", () => {
     })
   })
 
-  // afterAll(() => apiStore.prepare("DELETE FROM Users WHERE identifier = ?").run(credentials.identifier))
+  afterAll(() => apiStore.prepare("DELETE FROM Users WHERE identifier = ?").run(credentials.identifier))
 })
