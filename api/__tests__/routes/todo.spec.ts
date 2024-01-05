@@ -100,7 +100,7 @@ describe("Todo controller", () => {
       expect(res.body.success).toBeFalsy()
       expect(res.body.__toastify).toEqual([{ type: "error", message: "Le status de l'item doit être un boolean" }])
     })
-    test("change status an item by the id and matching my auth token", async () => {
+    test("change status an item by the id and matching my auth token and check the right value in Database", async () => {
       const res = await request(app)
         .put(`/api/todo/${itemId}`)
         .send({ status: true })
@@ -110,6 +110,10 @@ describe("Todo controller", () => {
         .expect(200)
 
       expect(res.body.success).toBeTruthy()
+
+      // check expected result 1 == status true
+      const exists = (await apiStore.prepare("SELECT status FROM Todos WHERE todoId = ?").get(itemId)) as { status: number } | undefined
+      expect(exists?.status).toEqual(1)
     })
   })
 
