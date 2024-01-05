@@ -124,9 +124,11 @@ describe("Todo controller", () => {
       expect(validateUUID(userId)).toBeTruthy()
     })
     test("change status false each items and matching my auth token and check the right value in Database", async () => {
+      const status = false // switch to true if you want ...
+
       const res = await request(app)
         .put("/api/todo")
-        .send({ status: false })
+        .send({ status })
         .set("Authorization", authorization)
         .set("Accept", "application/json")
         .expect("Content-Type", /json/)
@@ -135,7 +137,7 @@ describe("Todo controller", () => {
       expect(res.body.success).toBeTruthy()
 
       const todos = (await apiStore.prepare("SELECT status FROM Todos WHERE userId = ?").all(userId)) as { status: number }[]
-      expect(todos.map((todo) => `${todo.status}`).includes("1") || todos.length == 0).toBeFalsy()
+      expect(todos.map((todo) => `${todo.status}`).includes(status ? "0" : "1") || todos.length == 0).toBeFalsy()
     })
   })
 
