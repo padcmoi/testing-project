@@ -30,7 +30,10 @@
   }
   const changeStatus = (todo: Todo) => emit("change", todo)
   const removeItem = (todo: Todo) => emit("remove", todo)
-  const addItem = () => emit("addItem", item.value)
+  function addItem() {
+    emit("addItem", item.value)
+    item.value = ""
+  }
   function uncheckedAll() {
     modelValue.value.map((todo) => (todo.status = false))
     emit("uncheckedAll")
