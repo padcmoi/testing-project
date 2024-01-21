@@ -34,7 +34,6 @@ describe("TokenManager", () => {
     beforeAll(async () => {
       authManager = new AuthManager()
       response = await authManager.start("fd5b1b1e-a80d-526b-9d80-391b2c25ed06", true)
-      //   console.log(response)
     })
 
     test("authorization JWT created & valid", async () => {
@@ -97,7 +96,6 @@ describe("TokenManager", () => {
     beforeAll(async () => {
       const authManager = new AuthManager()
       response = await authManager.start("fd5b1b1e-a80d-526b-9d80-391b2c25ed06", true)
-      console.log(response)
     })
 
     test("check structure response", async () => {
