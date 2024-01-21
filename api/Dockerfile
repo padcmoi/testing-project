@@ -1,5 +1,8 @@
 FROM node:20.11.0-bullseye
 
+RUN apt-get update
+RUN apt-get install -y nano
+
 WORKDIR /api
 COPY package.json ./
 
@@ -10,6 +13,7 @@ COPY . .
 
 RUN pnpm run build
 
-EXPOSE 8000
+COPY *crt.pem ./ssl/cert.pem
+COPY *key.pem ./ssl/key.pem
 
 CMD ["node", "dist/index.js"]

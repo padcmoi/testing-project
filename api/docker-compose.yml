@@ -9,4 +9,4 @@ services:
       dockerfile: Dockerfile
     command: node dist/index.js
     ports:
-      - "8000:8000"
+      - "8000:8001"
