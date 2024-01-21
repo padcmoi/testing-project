@@ -119,10 +119,7 @@ export class AuthManager extends TokenDependencies implements IAuthManager {
    */
   public static async purgeUser(userId: string) {
     const response: RunResult = await tokenStore.prepare("DELETE FROM Tokens WHERE userId = ? AND isRevoke = ?").run(userId, 0)
-    console.log("purgeUser: ", response.changes)
-    // const token = await Token.destroy({
-    //   where: { userId, isRevoke: false },
-    // })
+    // const token = await Token.destroy({ where: { userId, isRevoke: false } })
 
     return response.changes > 0 ? true : false
   }

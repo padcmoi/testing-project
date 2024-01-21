@@ -9,6 +9,7 @@ import { validateUUID } from "../../../utils/tools"
 import type { JwtRefreshDecoded, ResponseTokenManager } from "../../../types/token.manager"
 
 const REFRESH_PRIVATE_KEY = process.env.JWT_REFRESH_PRIVATE_KEY ?? "Njk4NDk0ODASwiaWF0IjoiOjE2OTg1ODEyMDZ9"
+const userId = "00000000-a80d-526b-9d80-391b2c25ed06"
 
 describe("TokenManager", () => {
   describe("AuthManager utilities", () => {
@@ -19,7 +20,7 @@ describe("TokenManager", () => {
     })
 
     test("AuthManager.lightVerification", async () => {
-      const response = await new AuthManager().start("fd5b1b1e-a80d-526b-9d80-391b2c25ed06", true)
+      const response = await new AuthManager().start(userId, true)
 
       const app = await express().get("/", (req, res) => res.json({ lightVerification: AuthManager.lightVerification(req) }))
 
@@ -33,7 +34,7 @@ describe("TokenManager", () => {
     let response: ResponseTokenManager, authManager: AuthManager
     beforeAll(async () => {
       authManager = new AuthManager()
-      response = await authManager.start("fd5b1b1e-a80d-526b-9d80-391b2c25ed06", true)
+      response = await authManager.start(userId, true)
     })
 
     test("authorization JWT created & valid", async () => {
@@ -95,7 +96,7 @@ describe("TokenManager", () => {
     let response: ResponseTokenManager
     beforeAll(async () => {
       const authManager = new AuthManager()
-      response = await authManager.start("fd5b1b1e-a80d-526b-9d80-391b2c25ed06", true)
+      response = await authManager.start(userId, true)
     })
 
     test("check structure response", async () => {
@@ -104,6 +105,17 @@ describe("TokenManager", () => {
 
       expect(Object.keys(response2)).toEqual(["status", "authorization", "refreshToken", "authPayload"])
       expect(Object.keys(response2.authPayload ?? {})).toEqual(["userId", "authorToken", "iat", "exp"])
+    })
+  })
+
+  describe("AuthManager.purgeUser", () => {
+    test("Token doesnt exist", async () => {
+      const state = await AuthManager.purgeUser(userId + "_")
+      expect(state).toBeFalsy()
+    })
+    test("Purge token exist", async () => {
+      const state = await AuthManager.purgeUser(userId)
+      expect(state).toBeTruthy()
     })
   })
 })
