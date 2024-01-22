@@ -1,6 +1,6 @@
 import BetterSqlite3 from "better-sqlite3"
 
-const tokenStore = new BetterSqlite3("tokenStore.sqlite3", { fileMustExist: false })
+const tokenStore = new BetterSqlite3("./data/tokenStore.sqlite3", { fileMustExist: false })
 tokenStore.pragma("journal_mode = WAL") // performance
 
 /**

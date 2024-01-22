@@ -2,7 +2,7 @@ import BetterSqlite3 from "better-sqlite3"
 import type { Options } from "better-sqlite3"
 
 const options: Options = { fileMustExist: false }
-export const apiStore = new BetterSqlite3("database.sqlite3", options)
+export const apiStore = new BetterSqlite3("./data/apiStore.sqlite3", options)
 apiStore.pragma("journal_mode = WAL") // performance
 
 export function createDatabase() {

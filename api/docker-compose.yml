@@ -10,3 +10,5 @@ services:
     command: node dist/index.js
     ports:
       - "8000:8001"
+    volumes:
+      - ./data:/api/data
