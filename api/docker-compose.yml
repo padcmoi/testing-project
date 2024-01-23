@@ -2,6 +2,7 @@ version: '3'
 
 services:
   testing-project:
+    restart: always
     environment:
       - NODE_ENV=production
     build:
